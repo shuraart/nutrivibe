@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutrivibe — Hack ton corps</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#080d1a;
+      --surface:#0f1829;
+      --card:#141e30;
+      --border:rgba(255,255,255,0.06);
+      --pink:#ff6b9d;
+      --teal:#26d9cc;
+      --yellow:#ffd93d;
+      --green:#6bcb77;
+      --purple:#9b7dff;
+      --orange:#ff9f43;
+      --text:#eef2ff;
+      --muted:#7a8bb0;
+      --fd:'Fredoka One',cursive;
+      --fn:'Nunito',sans-serif;
+    }
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--fn);overflow-x:hidden;line-height:1.6}
+    ::-webkit-scrollbar{width:5px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:linear-gradient(var(--pink),var(--teal));border-radius:3px}
+
+    /* ── PARTICLES ── */
+    #particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+    .p{position:absolute;border-radius:50%;animation:rise linear infinite;opacity:0}
+    @keyframes rise{
+      0%{transform:translateY(110vh) rotate(0deg);opacity:0}
+      10%{opacity:.12}
+      90%{opacity:.08}
+      100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
+    }
+
+    /* ── NAV ── */
+    nav{
+      position:fixed;top:0;left:0;right:0;z-index:200;
+      padding:1rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      background:rgba(8,13,26,.75);backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+      transition:padding .3s;
+    }
+    .logo{display:flex;align-items:center;gap:.65rem;text-decoration:none}
+    .logo-badge{
+      width:38px;height:38px;border-radius:11px;
+      background:linear-gradient(135deg,var(--pink),var(--teal));
+      display:flex;align-items:center;justify-content:center;
+      font-family:var(--fd);font-size:1.1rem;color:#fff;
+      box-shadow:0 0 22px rgba(255,107,157,.5);
+    }
+    .logo-name{font-family:var(--fd);font-size:1.55rem;background:linear-gradient(135deg,var(--pink),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .nav-links{display:flex;gap:.15rem;list-style:none}
+    .nav-links a{
+      color:var(--muted);text-decoration:none;font-weight:700;
+      font-size:.75rem;padding:.4rem .75rem;border-radius:20px;
+      transition:all .25s;text-transform:uppercase;letter-spacing:.5px;
+    }
+    .nav-links a:hover{color:var(--text);background:var(--border)}
+    .nav-links a.active{color:var(--pink);background:rgba(255,107,157,.1)}
+    @media(max-width:900px){.nav-links{display:none}}
+
+    /* ── HERO ── */
+    .hero{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      padding:6rem 2rem 4rem;position:relative;z-index:1;
+    }
+    .hero-layout{
+      max-width:1180px;width:100%;display:flex;align-items:center;
+      gap:3rem;justify-content:space-between;
+    }
+    .hero-left{flex:1;text-align:left}
+    .hero-right{
+      flex:0 0 380px;position:relative;
+    }
+    .hero-img{
+      width:100%;border-radius:24px;
+      box-shadow:0 0 80px rgba(255,107,157,.35),0 0 160px rgba(38,217,204,.15);
+      animation:float-img 6s ease-in-out infinite;
+    }
+    @keyframes float-img{
+      0%,100%{transform:translateY(0)}
+      50%{transform:translateY(-16px)}
+    }
+    .hero-img-glow{
+      position:absolute;inset:-20px;border-radius:32px;
+      background:linear-gradient(135deg,rgba(255,107,157,.2),rgba(38,217,204,.2));
+      filter:blur(30px);z-index:-1;
+    }
+    @media(max-width:900px){
+      .hero-layout{flex-direction:column;text-align:center}
+      .hero-left{text-align:center}
+      .hero-right{flex:0 0 280px;width:280px}
+      .hero-stats{justify-content:center}
+    }
+    .hero-glow{
+      position:absolute;inset:0;overflow:hidden;pointer-events:none;
+    }
+    .glow-blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.18}
+    .gb1{width:700px;height:700px;background:var(--pink);top:-200px;right:-150px}
+    .gb2{width:600px;height:600px;background:var(--teal);bottom:-150px;left:-150px}
+    .gb3{width:350px;height:350px;background:var(--yellow);top:40%;left:35%}
+    .hero-inner{max-width:860px;position:relative}
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(255,107,157,.1);border:1px solid rgba(255,107,157,.3);
+      border-radius:50px;padding:.45rem 1.2rem;font-size:.8rem;
+      font-weight:800;color:var(--pink);margin-bottom:2rem;
+      text-transform:uppercase;letter-spacing:1px;
+    }
+    .hero-title{
+      font-family:var(--fd);font-size:clamp(3.5rem,10vw,8rem);
+      line-height:1.02;margin-bottom:1.5rem;
+      background:linear-gradient(135deg,#fff 0%,var(--pink) 35%,var(--teal) 65%,var(--yellow) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .hero-sub{font-size:clamp(1rem,2.5vw,1.3rem);color:var(--muted);max-width:580px;margin:0 auto 2.5rem;font-weight:600}
+    .hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:2.5rem}
+    .hstat .n{font-family:var(--fd);font-size:2.8rem;background:linear-gradient(135deg,var(--pink),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .hstat .l{font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+    .cta{
+      display:inline-flex;align-items:center;gap:.75rem;
+      background:linear-gradient(135deg,var(--pink),var(--purple));
+      color:#fff;text-decoration:none;padding:1rem 2.5rem;
+      border-radius:50px;font-weight:900;font-size:1.1rem;
+      box-shadow:0 0 50px rgba(255,107,157,.45);transition:all .3s;cursor:pointer;border:none;
+    }
+    .cta:hover{transform:translateY(-4px);box-shadow:0 0 70px rgba(255,107,157,.65)}
+
+    /* ── SECTION BASE ── */
+    .sec{padding:6rem 2rem;position:relative;z-index:1}
+    .wrap{max-width:1180px;margin:0 auto}
+    .sec-hdr{text-align:center;margin-bottom:3.5rem}
+    .stag{
+      display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;
+      letter-spacing:2px;padding:.3rem .9rem;border-radius:50px;margin-bottom:.85rem;
+    }
+    .stag-pink{background:rgba(255,107,157,.1);color:var(--pink);border:1px solid rgba(255,107,157,.3)}
+    .stag-teal{background:rgba(38,217,204,.1);color:var(--teal);border:1px solid rgba(38,217,204,.3)}
+    .stag-yellow{background:rgba(255,217,61,.1);color:var(--yellow);border:1px solid rgba(255,217,61,.3)}
+    .stag-green{background:rgba(107,203,119,.1);color:var(--green);border:1px solid rgba(107,203,119,.3)}
+    .stag-purple{background:rgba(155,125,255,.1);color:var(--purple);border:1px solid rgba(155,125,255,.3)}
+    .stag-orange{background:rgba(255,159,67,.1);color:var(--orange);border:1px solid rgba(255,159,67,.3)}
+    .stitle{font-family:var(--fd);font-size:clamp(2rem,5vw,3.2rem);line-height:1.1;margin-bottom:.75rem}
+    .sdesc{color:var(--muted);font-size:1.05rem;max-width:580px;margin:0 auto;font-weight:600}
+
+    /* gradient text */
+    .g-pink-teal{background:linear-gradient(135deg,var(--pink),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .g-teal-green{background:linear-gradient(135deg,var(--teal),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .g-yellow-orange{background:linear-gradient(135deg,var(--yellow),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .g-purple-pink{background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* ── MECHANISM BOX ── */
+    .mech{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:20px;padding:2.25rem;margin-bottom:2.5rem;
+    }
+    .mech-title{font-family:var(--fd);font-size:1.2rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:.65rem}
+    .mech p{color:var(--muted);font-size:.97rem;line-height:1.85;margin-bottom:.9rem}
+    .mech p:last-child{margin-bottom:0}
+    .mech strong{color:var(--text);font-weight:800}
+
+    /* ── CARDS ── */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:1.4rem}
+    .card{
+      background:var(--card);border:1px solid var(--border);border-radius:18px;
+      padding:1.85rem;position:relative;overflow:hidden;transition:all .3s;
+    }
+    .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ca,linear-gradient(90deg,var(--pink),var(--teal)))}
+    .card:hover{transform:translateY(-6px);border-color:rgba(255,255,255,.13);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+    .card-ico{font-size:2.4rem;margin-bottom:.85rem}
+    .card-title{font-family:var(--fd);font-size:1.25rem;margin-bottom:.65rem}
+    .card-text{color:var(--muted);font-size:.92rem;line-height:1.75}
+
+    /* ── LIST ── */
+    .alist{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+    .alist li{
+      display:flex;gap:.85rem;align-items:flex-start;
+      padding:.85rem 1.1rem;background:var(--surface);
+      border-radius:11px;border:1px solid var(--border);
+      font-size:.9rem;line-height:1.6;color:var(--muted);
+    }
+    .alist li .ico{font-size:1.15rem;flex-shrink:0;margin-top:.05rem}
+    .alist li strong{color:var(--text)}
+
+    /* ── ALERT BOXES ── */
+    .alert{border-radius:13px;padding:1.4rem;margin:1.4rem 0}
+    .alert h4{font-family:var(--fd);font-size:1rem;margin-bottom:.4rem;display:flex;align-items:center;gap:.45rem}
+    .alert p{font-size:.9rem;color:var(--muted)}
+    .alert-red{background:rgba(255,107,157,.05);border:1px solid rgba(255,107,157,.3);border-left:4px solid var(--pink)}
+    .alert-red h4{color:var(--pink)}
+    .alert-green{background:rgba(107,203,119,.05);border:1px solid rgba(107,203,119,.3);border-left:4px solid var(--green)}
+    .alert-green h4{color:var(--green)}
+    .alert-blue{background:rgba(38,217,204,.05);border:1px solid rgba(38,217,204,.3);border-left:4px solid var(--teal)}
+    .alert-blue h4{color:var(--teal)}
+    .alert-yellow{background:rgba(255,217,61,.05);border:1px solid rgba(255,217,61,.3);border-left:4px solid var(--yellow)}
+    .alert-yellow h4{color:var(--yellow)}
+
+    /* ── TABLE ── */
+    .ctable{width:100%;border-collapse:separate;border-spacing:0;border-radius:16px;overflow:hidden;margin-top:1.5rem}
+    .ctable th{padding:.9rem 1.4rem;font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px}
+    .ctable th:first-child{background:rgba(255,107,157,.1);color:var(--pink)}
+    .ctable th:last-child{background:rgba(107,203,119,.1);color:var(--green)}
+    .ctable td{padding:.9rem 1.4rem;font-size:.88rem;border-bottom:1px solid var(--border)}
+    .ctable td:first-child{background:rgba(255,107,157,.03);color:var(--muted)}
+    .ctable td:last-child{background:rgba(107,203,119,.03);color:var(--text);font-weight:700}
+
+    /* ── VITAMINS GRID ── */
+    .vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+    .vcard{
+      background:var(--card);border:1px solid var(--border);border-radius:15px;
+      padding:1.4rem;text-align:center;transition:all .3s;
+    }
+    .vcard:hover{transform:translateY(-4px);box-shadow:0 14px 40px rgba(0,0,0,.35)}
+    .vcard .vi{font-size:2.3rem;margin-bottom:.65rem}
+    .vcard h3{font-family:var(--fd);font-size:1.05rem;margin-bottom:.4rem}
+    .vcard p{font-size:.78rem;color:var(--muted);line-height:1.55}
+
+    /* ── PHASES ── */
+    .phases{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:2rem;margin-bottom:4rem}
+    .phase{
+      background:var(--card);border:1px solid var(--border);border-radius:22px;
+      padding:2.25rem;position:relative;overflow:hidden;
+    }
+    .phase-num{
+      position:absolute;top:-1.5rem;right:1rem;font-family:var(--fd);
+      font-size:7rem;opacity:.05;line-height:1;pointer-events:none;
+    }
+    .phase-tag{display:inline-block;font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:2px;padding:.3rem .75rem;border-radius:50px;margin-bottom:.85rem}
+    .phase h3{font-family:var(--fd);font-size:1.55rem;margin-bottom:.4rem}
+    .phase .sub{color:var(--muted);font-size:.88rem;margin-bottom:1.25rem}
+    .phase ul{list-style:none;display:flex;flex-direction:column;gap:.5rem}
+    .phase ul li{font-size:.88rem;display:flex;align-items:flex-start;gap:.65rem;color:var(--muted)}
+    .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:.45rem}
+
+    /* ── TIMELINE ── */
+    .timeline{position:relative;padding-left:1.8rem;margin-top:2rem}
+    .timeline::before{
+      content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+      background:linear-gradient(180deg,var(--pink),var(--teal),var(--green));
+    }
+    .titem{position:relative;padding:0 0 2.5rem 2.25rem}
+    .tdot{
+      position:absolute;left:-1.8rem;top:.2rem;width:18px;height:18px;
+      border-radius:50%;transform:translateX(-35%);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;box-shadow:0 0 12px rgba(0,0,0,.5);flex-shrink:0;
+    }
+    .ttime{font-family:var(--fd);font-size:1.35rem;margin-bottom:.5rem}
+    .tcontent{
+      background:var(--card);border:1px solid var(--border);border-radius:15px;padding:1.4rem;
+    }
+    .tcontent h4{font-weight:800;margin-bottom:.65rem;font-size:1rem}
+    .tcontent ul{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+    .tcontent ul li{font-size:.87rem;color:var(--muted);display:flex;align-items:flex-start;gap:.5rem}
+    .tcontent ul li::before{content:'→';color:var(--teal);font-weight:800;flex-shrink:0}
+
+    /* ── SECTION IMAGES ── */
+    .sec-img{margin-bottom:2.5rem;border-radius:20px;overflow:hidden;position:relative}
+    .simg{
+      width:100%;max-height:360px;object-fit:cover;border-radius:20px;
+      display:block;
+      box-shadow:0 0 60px rgba(255,107,157,.2),0 20px 60px rgba(0,0,0,.5);
+      transition:transform .5s ease;
+    }
+    .simg:hover{transform:scale(1.02)}
+
+    /* ── SEP ── */
+    .sep{height:1px;background:var(--border)}
+
+    /* ── SECTION TINTS ── */
+    .s-insulin{background:linear-gradient(180deg,var(--bg),rgba(155,125,255,.04),var(--bg))}
+    .s-mito{background:linear-gradient(180deg,var(--bg),rgba(38,217,204,.04),var(--bg))}
+    .s-hormones{background:linear-gradient(180deg,var(--bg),rgba(255,159,67,.04),var(--bg))}
+    .s-nutrition{background:linear-gradient(180deg,var(--bg),rgba(107,203,119,.04),var(--bg))}
+    .s-vitamins{background:linear-gradient(180deg,var(--bg),rgba(255,217,61,.04),var(--bg))}
+    .s-fatburn{background:linear-gradient(180deg,var(--bg),rgba(255,107,157,.04),var(--bg))}
+    .s-errors{background:linear-gradient(180deg,var(--bg),rgba(155,125,255,.04),var(--bg))}
+    .s-proto{background:linear-gradient(180deg,rgba(38,217,204,.04),rgba(107,203,119,.04))}
+
+    /* ── FOOTER ── */
+    footer{text-align:center;padding:3rem 2rem;border-top:1px solid var(--border);color:var(--muted);font-size:.88rem;position:relative;z-index:1}
+    footer .fn{font-family:var(--fd);font-size:2.2rem;background:linear-gradient(135deg,var(--pink),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block;margin-bottom:.4rem}
+
+    /* ── REVEAL ── */
+    .rv{opacity:0;transform:translateY(32px)}
+    .no-js .rv{opacity:1;transform:none}
+
+    /* ── FOIE SECTION ── */
+    .stages{display:flex;flex-wrap:wrap;gap:1rem;margin-top:1.5rem}
+    .stage{
+      flex:1;min-width:140px;background:var(--card);border:1px solid var(--border);
+      border-radius:13px;padding:1.1rem;text-align:center;
+    }
+    .stage .sn{font-family:var(--fd);font-size:2rem}
+    .stage p{font-size:.78rem;color:var(--muted);margin-top:.3rem}
+
+    /* ── BIG QUOTE ── */
+    .bq{
+      text-align:center;padding:4rem 2rem;
+      font-family:var(--fd);font-size:clamp(1.6rem,4vw,2.8rem);
+      line-height:1.3;color:var(--text);position:relative;z-index:1;
+    }
+    .bq span{background:linear-gradient(135deg,var(--pink),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+    /* ── PYRAMID ── */
+    .pyramid{display:flex;flex-direction:column;align-items:center;gap:.5rem;margin:2rem auto;max-width:500px}
+    .plevel{
+      border-radius:10px;padding:.7rem 1.5rem;text-align:center;
+      font-weight:800;font-size:.9rem;transition:all .3s;
+    }
+    .plevel:hover{transform:scale(1.03)}
+  </style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="logo">
+    <div class="logo-badge">N</div>
+    <span class="logo-name">Nutrivibe</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#insuline">Insuline</a></li>
+    <li><a href="#mitochondries">Mitochondries</a></li>
+    <li><a href="#hormones">Hormones</a></li>
+    <li><a href="#nutrition">Nutrition</a></li>
+    <li><a href="#vitamines">Vitamines</a></li>
+    <li><a href="#fatburn">Fat Burn</a></li>
+    <li><a href="#erreurs">Erreurs</a></li>
+    <li><a href="#protocole">Mon Plan</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-glow">
+    <div class="glow-blob gb1"></div>
+    <div class="glow-blob gb2"></div>
+    <div class="glow-blob gb3"></div>
+  </div>
+  <div class="hero-layout">
+    <div class="hero-left rv">
+      <div class="hero-badge">⚡ Science du corps humain</div>
+      <h1 class="hero-title">Hack<br>ton corps</h1>
+      <p class="hero-sub">Insuline, mitochondries, hormones — le vrai manuel de ton corps. Basé sur la science, pas les influenceurs.</p>
+      <div class="hero-stats">
+        <div class="hstat"><div class="n" data-count="48">0</div><div class="l">Vidéos analysées</div></div>
+        <div class="hstat"><div class="n" data-count="8">0</div><div class="l">Systèmes décodés</div></div>
+        <div class="hstat"><div class="n" data-count="3">0</div><div class="l">Phases</div></div>
+      </div>
+      <a href="#insuline" class="cta">Commencer le voyage 🚀</a>
+    </div>
+    <div class="hero-right rv">
+      <div class="hero-img-glow"></div>
+      <img src="images/nutrivibe-hero-character.png" alt="Nutrivibe character" class="hero-img">
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- INSULINE -->
+<section class="sec s-insulin" id="insuline">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-purple">Système 01</div>
+      <h2 class="stitle g-purple-pink">⚡ L'Insuline</h2>
+      <p class="sdesc">L'hormone qui décide si tu brûles de la graisse ou si tu en stockes. Tout part de là.</p>
+    </div>
+
+    <div class="sec-img rv">
+      <img src="images/nutrivibe-insuline.png" alt="Insuline mécanisme" class="simg">
+    </div>
+    <div class="mech rv">
+      <div class="mech-title">🔬 Le mécanisme</div>
+      <p>Chaque fois que tu manges, ton pancréas sécrète de l'insuline. Son job : ouvrir les "portes" de tes cellules pour que le glucose rentre et serve d'énergie.</p>
+      <p>Le problème : quand tu manges <strong>trop souvent des glucides rapides</strong> (pain, pâtes, gâteaux, sodas), ces portes s'abîment progressivement. C'est la <strong>résistance à l'insuline</strong>. Résultat : 50% du glucose ne rentre plus dans les cellules et se convertit directement en <strong>graisse</strong>.</p>
+      <p>Et même si tu manges peu de calories, ton corps continue de stocker. C'est pour ça que "manger moins" seul ne marche pas. <strong>L'hormonal prime toujours sur les calories.</strong></p>
+    </div>
+
+    <div class="grid rv">
+      <div class="card" style="--ca:linear-gradient(90deg,var(--pink),var(--purple))">
+        <div class="card-ico">💥</div>
+        <div class="card-title">Ce qui déclenche l'insuline</div>
+        <ul class="alist">
+          <li><span class="ico">🍞</span>Pain blanc, pain complet, pâtes, riz</li>
+          <li><span class="ico">🎂</span>Gâteaux, biscuits, céréales du matin</li>
+          <li><span class="ico">🥤</span>Sodas, jus de fruits (même "naturels")</li>
+          <li><span class="ico">⏰</span>Manger 6 fois/jour → insuline constamment haute</li>
+        </ul>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--teal),var(--green))">
+        <div class="card-ico">✅</div>
+        <div class="card-title">Actions concrètes</div>
+        <ul class="alist">
+          <li><span class="ico">🍽️</span>Maximum 2-3 repas/jour, <strong>zéro snacking</strong></li>
+          <li><span class="ico">⏱️</span>Jeûne 16-20h pour laisser l'insuline descendre</li>
+          <li><span class="ico">💪</span>Sport : après l'effort, les récepteurs s'ouvrent naturellement</li>
+          <li><span class="ico">🌿</span>Glucides uniquement autour de l'entraînement</li>
+        </ul>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--yellow),var(--orange))">
+        <div class="card-ico">🎯</div>
+        <div class="card-title">Résultats attendus</div>
+        <ul class="alist">
+          <li><span class="ico">🔥</span>Brûlage de graisse même sans réduire les calories</li>
+          <li><span class="ico">😤</span>Fin des fringales entre les repas</li>
+          <li><span class="ico">⚡</span>Énergie stable toute la journée</li>
+          <li><span class="ico">🧠</span>Clarté mentale retrouvée</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert alert-red rv">
+      <h4>🚨 L'erreur #1 de 95% des gens</h4>
+      <p>Croire que le problème c'est "les calories". Si ton insuline est chroniquement élevée, tu stockes de la graisse même en déficit calorique. <strong>L'hormonal prime toujours.</strong> Tous les influenceurs qui ne parlent que de calories = incomplets.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- MITOCHONDRIES -->
+<section class="sec s-mito" id="mitochondries">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-teal">Système 02</div>
+      <h2 class="stitle g-teal-green">🔋 Les Mitochondries</h2>
+      <p class="sdesc">Tes centrales nucléaires. 100 millions de milliards dans ton corps. Si elles foutent le camp, tu brûles 4x moins de graisse.</p>
+    </div>
+
+    <div class="sec-img rv">
+      <img src="images/nutrivibe-mitochondries.png" alt="Mitochondries" class="simg">
+    </div>
+    <div class="mech rv">
+      <div class="mech-title">🔬 Le mécanisme</div>
+      <p>Les mitochondries prennent ce que tu manges, le mélangent avec l'oxygène, et fabriquent de l'énergie (ATP). Elles produisent <strong>95% de toute ton énergie</strong>.</p>
+      <p>Problème : elles rejettent des <strong>radicaux libres</strong> comme déchets. Ces radicaux restent bloqués à l'intérieur et les abîment progressivement. Une mitochondrie abîmée ne peut plus transformer l'énergie efficacement → ton corps stocke plus de graisse.</p>
+      <p>Avec l'âge, les dommages s'accumulent. C'est pour ça qu'<strong>à 45 ans tu brûles moins de graisse qu'à 25</strong>, même en mangeant pareil.</p>
+    </div>
+
+    <div class="grid rv">
+      <div class="card" style="--ca:linear-gradient(90deg,var(--orange),var(--pink))">
+        <div class="card-ico">☠️</div>
+        <div class="card-title">Ce qui les détruit</div>
+        <ul class="alist">
+          <li><span class="ico">🍟</span>Huiles chauffées (friture, wok) → radicaux libres massifs</li>
+          <li><span class="ico">🍔</span>Fast-food et aliments ultra-transformés</li>
+          <li><span class="ico">🍭</span>Fructose en excès (jus de fruits, sodas)</li>
+          <li><span class="ico">🍺</span>Alcool — agit exactement comme le fructose</li>
+        </ul>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--teal),var(--green))">
+        <div class="card-ico">🔄</div>
+        <div class="card-title">Comment les réparer</div>
+        <ul class="alist">
+          <li><span class="ico">⏰</span>Jeûne 16h+ → <strong>autophagie</strong> (ton corps détruit les mitochondries abîmées)</li>
+          <li><span class="ico">💪</span>Musculation → force la création de nouvelles mitochondries saines</li>
+          <li><span class="ico">😴</span>7-8h de sommeil → conditions optimales pour l'autophagie</li>
+          <li><span class="ico">🥦</span>Antioxydants (légumes) → neutralisent les radicaux libres</li>
+        </ul>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--yellow),var(--teal))">
+        <div class="card-ico">📈</div>
+        <div class="card-title">Résultats attendus</div>
+        <ul class="alist">
+          <li><span class="ico">⚡</span>Après 4-8 semaines : énergie nettement plus haute</li>
+          <li><span class="ico">🔥</span>Brûlage de graisse significativement plus rapide</li>
+          <li><span class="ico">🧠</span>Clarté mentale et concentration améliorées</li>
+          <li><span class="ico">🏃</span>Endurance et récupération musculaire optimisées</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert alert-blue rv">
+      <h4>💡 Le secret de l'autophagie</h4>
+      <p>Après 16h de jeûne, ton corps active un processus de nettoyage : il repère les mitochondries abîmées, les enrobe dans une membrane et les digère. C'est le seul moyen de s'en débarrasser. <strong>Pas de complément. Pas de pilule. Juste ne pas manger pendant 16h.</strong></p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- HORMONES -->
+<section class="sec s-hormones" id="hormones">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-orange">Système 03</div>
+      <h2 class="stitle g-yellow-orange">🎛️ Les Hormones</h2>
+      <p class="sdesc">Le tableau de bord invisible. HGH, cortisol, testostérone — ces 3 décident entièrement de ta transformation.</p>
+    </div>
+
+    <div class="sec-img rv">
+      <img src="images/nutrivibe-hormones.png" alt="Hormones" class="simg">
+    </div>
+    <div class="grid rv">
+      <div class="card" style="--ca:linear-gradient(90deg,var(--purple),var(--pink))">
+        <div class="card-ico">🌙</div>
+        <div class="card-title" style="color:var(--purple)">Hormone de croissance (HGH)</div>
+        <div class="card-text">Sécrétée à <strong style="color:var(--text)">80% pendant le sommeil</strong>. Elle libère les graisses et répare les tissus. Mais elle est <strong style="color:var(--text)">bloquée par l'insuline</strong> : si tu manges des glucides le soir, tu bloques 3-4h de brûlage de graisse nocturne.</div>
+        <div class="alert alert-red" style="margin-top:1rem">
+          <h4>⚠️ Action clé</h4>
+          <p>Finir de manger 3-4h avant de dormir. Repas du soir = protéines + légumes, zéro glucides élevés.</p>
+        </div>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--orange),var(--yellow))">
+        <div class="card-ico">😤</div>
+        <div class="card-title" style="color:var(--yellow)">Cortisol (hormone du stress)</div>
+        <div class="card-text">Sécrété lors du stress et de l'entraînement intensif. Son rôle : chercher de l'énergie en <strong style="color:var(--text)">cassant tes muscles</strong>. C'est l'ennemi numéro 1 de ta masse musculaire. S'entraîner complètement à jeun = le cortisol détruit le muscle.</div>
+        <div class="alert alert-green" style="margin-top:1rem">
+          <h4>✅ Solution</h4>
+          <p>30g glucides + 10g protéines, 30min avant la séance. L'insuline monte légèrement → bloque le cortisol.</p>
+        </div>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--yellow),var(--green))">
+        <div class="card-ico">⚡</div>
+        <div class="card-title" style="color:var(--green)">Testostérone & Aromatase</div>
+        <div class="card-text">La graisse contient une enzyme (<strong style="color:var(--text)">aromatase</strong>) qui convertit ta testostérone en œstrogène. Plus tu as de graisse → moins de testostérone → moins de muscle → plus de graisse. Cercle vicieux.</div>
+        <div class="alert alert-green" style="margin-top:1rem">
+          <h4>✅ Solution</h4>
+          <p>Perdre la graisse en priorité. Quand elle baisse, l'aromatase baisse, la testostérone remonte naturellement.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- NUTRITION -->
+<section class="sec s-nutrition" id="nutrition">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-green">Système 04</div>
+      <h2 class="stitle g-teal-green">🥗 La Nutrition</h2>
+      <p class="sdesc">Ce n'est pas que "quoi manger". C'est surtout <em>quand</em> tu manges. Le timing change tout au résultat.</p>
+    </div>
+
+    <div class="mech rv">
+      <div class="mech-title">⏰ La règle du timing</div>
+      <p><strong>Le matin</strong> : Continue le jeûne. Insuline basse = lipolyse (brûlage de graisse) maximale. Un petit-déj sucré bloque 3-4h de brûlage immédiatement.</p>
+      <p><strong>Autour de l'entraînement</strong> : C'est le seul moment où les glucides sont vraiment utiles. Pré-séance : 30g glucides + 10g protéines. Post-séance : glucides + 30g protéines <strong>obligatoires</strong> (active le mTOR pour la construction musculaire).</p>
+      <p><strong>Le soir</strong> : Protéines + légumes + patate douce max. Zéro pâtes, pain, riz blanc. L'insuline doit être basse au coucher pour que <strong>l'hormone de croissance</strong> travaille toute la nuit.</p>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-size:1.7rem;text-align:center;margin-bottom:1.25rem" class="rv">🍽️ Ami ou Ennemi ?</h3>
+    <table class="ctable rv">
+      <thead><tr><th>❌ Éviter (insuline haute)</th><th>✅ Privilégier</th></tr></thead>
+      <tbody>
+        <tr><td>Pain blanc / pain complet / pâtes</td><td>Patate douce, riz complet (post-training seulement)</td></tr>
+        <tr><td>Gâteaux, céréales, biscuits</td><td>Légumes verts (épinards, brocoli, courgettes)</td></tr>
+        <tr><td>Sodas, jus de fruits</td><td>Œufs entiers + blancs d'œufs</td></tr>
+        <tr><td>Fast-food, fritures, huile chauffée</td><td>Poisson gras (saumon, maquereau) 2x/semaine</td></tr>
+        <tr><td>Plus de 2 fruits/jour (fructose)</td><td>Poulet, viande maigre, fromage blanc</td></tr>
+        <tr><td>Alcool</td><td>Huile d'olive crue — jamais chauffée</td></tr>
+      </tbody>
+    </table>
+
+    <div class="alert alert-red rv" style="margin-top:2rem">
+      <h4>⚠️ Le mythe du 2g de protéines par kg</h4>
+      <p>Les influenceurs disent 2g/kg de poids total. C'est faux. C'est par kg de <strong>masse musculaire</strong>, pas de poids total. Pour 78kg avec du surpoids, 1,2-1,5g/kg suffit (≈95-115g/jour). Au-delà, les protéines se convertissent en glucose puis en graisse.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- VITAMINES -->
+<section class="sec s-vitamins" id="vitamines">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-yellow">Système 05</div>
+      <h2 class="stitle g-yellow-orange">💊 Vitamines & Minéraux</h2>
+      <p class="sdesc">Les briques invisibles. Tout se trouve dans la vraie nourriture. Zéro complément nécessaire si tu manges correctement.</p>
+    </div>
+
+    <div class="sec-img rv">
+      <img src="images/nutrivibe-vitamines.png" alt="Vitamines et minéraux" class="simg">
+    </div>
+    <div class="vgrid rv">
+      <div class="vcard" style="border-top:3px solid var(--orange)">
+        <div class="vi">🥕</div><h3>Vitamine A</h3>
+        <p>Peau, cheveux, immunité, cicatrisation. 100g carottes = 95% de tes besoins. Une carotte par jour.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--green)">
+        <div class="vi">🧬</div><h3>Vitamine B9</h3>
+        <p><strong>CRITIQUE.</strong> Fabrique les briques de l'ADN. Carence = mutations génétiques = risque cancer. 200g épinards + 200g lentilles = couvert.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--yellow)">
+        <div class="vi">🍊</div><h3>Vitamine C</h3>
+        <p>Sans elle, le collagène ne se fixe pas. Peau qui s'affaisse, tendons fragiles. 100g poivron rouge = 150% des besoins.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--teal)">
+        <div class="vi">🦴</div><h3>Vitamine K</h3>
+        <p>Fixe le calcium dans les os. Sans elle = ostéoporose. 100g épinards = 400% des besoins quotidiens.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--pink)">
+        <div class="vi">🩸</div><h3>Fer</h3>
+        <p>Transport de l'oxygène. Carence = fatigue chronique, essoufflement. 3 œufs + 200g bœuf + épinards = 15mg/jour.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--purple)">
+        <div class="vi">💜</div><h3>Magnésium</h3>
+        <p>Sommeil profond, récupération, crampes. 400mg/jour. Épinards + amandes + chocolat noir 85% = done.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--orange)">
+        <div class="vi">🥛</div><h3>Calcium</h3>
+        <p>Os, rythme cardiaque, contraction musculaire. 1g/jour. Lait + fromage + sardines + yaourt = 1g.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--green)">
+        <div class="vi">🍌</div><h3>Potassium</h3>
+        <p>Cœur, pression artérielle, muscles. 3,5g/jour. Patate douce + épinards + banane + avocat = couvert.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--teal)">
+        <div class="vi">🐟</div><h3>Oméga-3</h3>
+        <p>Cerveau, cœur, hormones, vision. Ton corps ne peut pas le fabriquer. 2x/semaine poisson gras = résolu.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--yellow)">
+        <div class="vi">🧂</div><h3>Sodium</h3>
+        <p>Tu en as trop, pas trop peu. Max 2g/jour. Les aliments transformés t'en donnent 5-6g en secret.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--pink)">
+        <div class="vi">💀</div><h3>Phosphore</h3>
+        <p>Acide phosphorique dans sodas + pain industriel = excès = bloque le calcium = os fragiles. Fuis les sodas.</p>
+      </div>
+      <div class="vcard" style="border-top:3px solid var(--purple)">
+        <div class="vi">✨</div><h3>Collagène</h3>
+        <p>5-10g/jour AVEC vitamine C. Sans vit C = ne se fixe pas = inutile. Vérifie toujours la composition.</p>
+      </div>
+    </div>
+
+    <div class="alert alert-green rv" style="margin-top:2rem">
+      <h4>💡 La règle d'or</h4>
+      <p>Épinards quotidiens + poisson 2x/semaine + œufs chaque jour + légumes colorés + quelques noix. <strong>Zéro complément nécessaire</strong> si tu manges varié et non-transformé.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- FAT BURN -->
+<section class="sec s-fatburn" id="fatburn">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-pink">Système 06</div>
+      <h2 class="stitle g-pink-teal">🔥 Brûler la Graisse</h2>
+      <p class="sdesc">La science exacte du cardio. Faire du sport n'importe comment = brûler du glucose, pas de la graisse. Voilà la méthode.</p>
+    </div>
+
+    <div class="sec-img rv">
+      <img src="images/nutrivibe-fatburn.png" alt="Fat burning" class="simg">
+    </div>
+    <div class="mech rv">
+      <div class="mech-title">🔬 La règle de base</div>
+      <p>La lipolyse (brûlage de graisse) ne démarre que quand l'insuline est <strong>basse</strong>. Si ton insuline est élevée = système de brûlage désactivé, peu importe l'intensité de ton effort.</p>
+      <p><strong>Intensité optimale : 130 pulsations/minute</strong> (modéré — tu peux parler pendant l'effort). À cette intensité, ton corps tire directement dans les graisses. Au-delà → il tape dans le glucose puis dans les muscles.</p>
+    </div>
+
+    <h3 style="font-family:var(--fd);font-size:1.7rem;text-align:center;margin-bottom:1.25rem" class="rv">📊 Comparatif réel — 1h de cardio</h3>
+    <table class="ctable rv">
+      <thead><tr><th>❌ Mauvaise méthode</th><th>✅ Bonne méthode</th></tr></thead>
+      <tbody>
+        <tr><td>Manger 1h avant le cardio</td><td>Cardio à jeûn (16h+ de jeûne)</td></tr>
+        <tr><td>Manger immédiatement après</td><td>Attendre 1h30 après le cardio</td></tr>
+        <tr><td>Intensité HIIT (180 puls/min)</td><td>130 pulsations/min (modéré)</td></tr>
+        <tr><td>Résultat : ~15g graisse brûlée</td><td>Résultat : ~65g graisse brûlée</td></tr>
+      </tbody>
+    </table>
+
+    <div class="grid rv" style="margin-top:2rem">
+      <div class="card" style="--ca:linear-gradient(90deg,var(--pink),var(--purple))">
+        <div class="card-ico">❌</div>
+        <div class="card-title">L'erreur "manger avant"</div>
+        <div class="card-text">Tu manges une banane à 9h30, cardio à 10h. Les 45 premières minutes → ton corps brûle la banane. Tu commences à brûler de la graisse seulement à 10h45... et tu t'arrêtes à 11h. Résultat : <strong style="color:var(--pink)">15g de graisse brûlée</strong>.</div>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--teal),var(--green))">
+        <div class="card-ico">✅</div>
+        <div class="card-title">La méthode optimale</div>
+        <div class="card-text">Cardio à jeûn (café noir OK). Après, les acides gras continuent de circuler pendant 1h30 dans le sang. Tu attends avant de manger. Résultat : <strong style="color:var(--green)">65g de graisse brûlée — 4x plus efficace.</strong></div>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--yellow),var(--orange))">
+        <div class="card-ico">📅</div>
+        <div class="card-title">Le programme Phase 1</div>
+        <ul class="alist">
+          <li><span class="ico">🚶</span>Marche rapide 60-90min à jeûn</li>
+          <li><span class="ico">🚴</span>Vélo, natation à intensité modérée</li>
+          <li><span class="ico">📆</span>3-4 fois par semaine</li>
+          <li><span class="ico">❌</span>Éviter le HIIT tant que tu as beaucoup de graisse</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ERREURS -->
+<section class="sec s-errors" id="erreurs">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-pink">Système 07</div>
+      <h2 class="stitle g-purple-pink">🚫 Les Pièges</h2>
+      <p class="sdesc">Ce que les influenceurs et l'industrie te cachent. Les erreurs qui t'empêchent d'avancer depuis des années.</p>
+    </div>
+
+    <div class="grid rv">
+      <div class="card" style="--ca:linear-gradient(90deg,var(--pink),var(--orange))">
+        <div class="card-ico">💰</div>
+        <div class="card-title">Les compléments alimentaires</div>
+        <div class="card-text" style="margin-bottom:1rem">Le modèle business : tu progresses au début (habitudes meilleures + effet placebo), tu stagnes, ils te vendent un complément. Boucle infinie.</div>
+        <ul class="alist">
+          <li><span class="ico">❌</span>Brûle-graisses = caféine → max 30 calories de plus par jour</li>
+          <li><span class="ico">❌</span>Oméga-3 en gélule = arnaque si tu manges du poisson</li>
+          <li><span class="ico">❌</span>Collagène sans vitamine C = ne se fixe pas = inutile</li>
+          <li><span class="ico">❌</span>Magnésium en poudre = tout dans les épinards et amandes</li>
+        </ul>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--orange),var(--yellow))">
+        <div class="card-ico">🔄</div>
+        <div class="card-title">L'effet yoyo</div>
+        <div class="card-text" style="margin-bottom:1rem">Chaque kg de graisse = des milliards de cellules graisseuses qui se <strong>vident</strong>. Elles ne disparaissent pas. Dès que tu relâches, elles se reremplissent à toute vitesse et <strong>se multiplient</strong>.</div>
+        <div class="alert alert-red">
+          <h4>⚠️ La solution</h4>
+          <p>Perte lente (0,5-1kg/semaine), habitudes à vie, pas de régime express. Sinon tu reviens encore plus gros.</p>
+        </div>
+      </div>
+      <div class="card" style="--ca:linear-gradient(90deg,var(--yellow),var(--green))">
+        <div class="card-ico">🍎</div>
+        <div class="card-title">Le sucre des fruits (fructose)</div>
+        <div class="card-text" style="margin-bottom:1rem">Ton foie est le <strong>seul organe</strong> capable de métaboliser le fructose. Capacité max : 30-40g par jour. Au-delà → stocké directement en graisse → foie gras.</div>
+        <ul class="alist">
+          <li><span class="ico">🍎</span>1 pomme = 15g de fructose</li>
+          <li><span class="ico">⚠️</span>2 pommes = limite déjà atteinte</li>
+          <li><span class="ico">🥤</span>Sodas + fruits + miel + jus = explosion du foie</li>
+          <li><span class="ico">✅</span>Max 2 fruits/jour, le reste = légumes</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="alert alert-yellow rv" style="margin-top:1.5rem">
+      <h4>⚡ Sur l'OMAD (One Meal A Day)</h4>
+      <p>L'OMAD peut être excellent (20h+ de jeûne = autophagie maximale). Mais <strong>pas n'importe comment</strong>. 1 burger fast-food + frites + soda = radicaux libres massifs + zéro vitamines. L'OMAD bien fait : poulet ou poisson + grande salade + légumes variés. 1300 calories de vraie nourriture = magnifique pour la santé.</p>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- BIG QUOTE -->
+<div class="bq">
+  Ce n'est pas un régime.<br>
+  <span>C'est la reprogrammation de ton métabolisme.</span>
+</div>
+
+<div class="sep"></div>
+
+<!-- PROTOCOLE TOM -->
+<section class="sec s-proto" id="protocole">
+  <div class="wrap">
+    <div class="sec-hdr rv">
+      <div class="stag stag-teal">Plan personnalisé</div>
+      <h2 class="stitle g-teal-green">🎯 Mon Protocole</h2>
+      <p class="sdesc">45 ans, 1m62, 78kg. Objectif : 65kg durable puis construction musculaire. Plan en 3 phases.</p>
+    </div>
+
+    <!-- PYRAMID -->
+    <h3 style="font-family:var(--fd);font-size:1.6rem;text-align:center;margin-bottom:1.25rem" class="rv">📐 La pyramide de priorités</h3>
+    <div class="pyramid rv">
+      <div class="plevel" style="width:220px;background:rgba(255,217,61,.1);border:1px solid rgba(255,217,61,.3);color:var(--yellow)">Calories (dernier niveau)</div>
+      <div class="plevel" style="width:290px;background:rgba(107,203,119,.1);border:1px solid rgba(107,203,119,.3);color:var(--green)">Timing de nutrition</div>
+      <div class="plevel" style="width:360px;background:rgba(38,217,204,.1);border:1px solid rgba(38,217,204,.3);color:var(--teal)">Métabolisme énergétique</div>
+      <div class="plevel" style="width:430px;background:rgba(255,107,157,.1);border:1px solid rgba(255,107,157,.3);color:var(--pink)">Hormones & Mitochondries — LA BASE</div>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:.9rem;font-weight:600;margin-bottom:3rem" class="rv">Les influenceurs qui ne parlent que de calories sautent les 3 niveaux en dessous.</p>
+
+    <!-- PHASES -->
+    <div class="phases rv">
+      <div class="phase">
+        <div class="phase-num">1</div>
+        <span class="phase-tag stag-pink">Phase 1 — 3 mois</span>
+        <h3>Perte de graisse</h3>
+        <div class="sub">Objectif : descendre à 65-68kg. Priorité absolue avant tout le reste.</div>
+        <ul>
+          <li><span class="dot" style="background:var(--pink)"></span>Cardio 3-4x/semaine (marche à jeûn 60-90min)</li>
+          <li><span class="dot" style="background:var(--pink)"></span>Jeûne intermittent 16-18h/jour</li>
+          <li><span class="dot" style="background:var(--pink)"></span>Zéro glucides transformés</li>
+          <li><span class="dot" style="background:var(--pink)"></span>Musculation en pause (aromatase trop haute)</li>
+          <li><span class="dot" style="background:var(--pink)"></span>1500-1600 calories/jour</li>
+          <li><span class="dot" style="background:var(--pink)"></span><strong>Résultat : -6 à 12kg en 3 mois</strong></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="phase-num">2</div>
+        <span class="phase-tag stag-teal">Phase 2 — 3 à 6 mois</span>
+        <h3>Construction musculaire</h3>
+        <div class="sub">Après Phase 1 seulement. Objectif : 70-75kg (muscle, pas graisse).</div>
+        <ul>
+          <li><span class="dot" style="background:var(--teal)"></span>Musculation 4x/semaine (exercices poly-articulaires)</li>
+          <li><span class="dot" style="background:var(--teal)"></span>Cardio 2x/semaine (maintien uniquement)</li>
+          <li><span class="dot" style="background:var(--teal)"></span>Glucides autour de l'entraînement</li>
+          <li><span class="dot" style="background:var(--teal)"></span>30g protéines post-training obligatoires (mTOR)</li>
+          <li><span class="dot" style="background:var(--teal)"></span>1900-2100 calories/jour</li>
+          <li><span class="dot" style="background:var(--teal)"></span><strong>Résultat : +6-8kg de muscle en 6 mois</strong></li>
+        </ul>
+      </div>
+      <div class="phase">
+        <div class="phase-num">3</div>
+        <span class="phase-tag stag-green">Phase 3 — À vie</span>
+        <h3>Maintenance</h3>
+        <div class="sub">Le mode de vie final. Pas un régime — une façon de vivre pour toujours.</div>
+        <ul>
+          <li><span class="dot" style="background:var(--green)"></span>3x musculation + 2x cardio/semaine</li>
+          <li><span class="dot" style="background:var(--green)"></span>Jeûne 16-18h, 2-3x/semaine</li>
+          <li><span class="dot" style="background:var(--green)"></span>80% alimentation propre, 20% flexibilité</li>
+          <li><span class="dot" style="background:var(--green)"></span>Insuline basse le soir — toujours</li>
+          <li><span class="dot" style="background:var(--green)"></span>7-8h de sommeil — toujours</li>
+          <li><span class="dot" style="background:var(--green)"></span>Fast-food 1x tous les 3 mois max</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- TIMELINE JOURNEE TYPE -->
+    <h3 style="font-family:var(--fd);font-size:1.7rem;text-align:center;margin-bottom:.5rem" class="rv">⏰ Journée type — Phase 1</h3>
+    <p style="text-align:center;color:var(--muted);font-weight:600;margin-bottom:1.5rem;font-size:.9rem" class="rv">Total : ~1550 calories · Jeûne 16h · Cardio à jeûn · Insuline basse le soir</p>
+
+    <div class="timeline rv">
+      <div class="titem">
+        <div class="tdot" style="background:var(--yellow);color:#000">☀️</div>
+        <div class="ttime" style="color:var(--yellow)">7h30 — Réveil</div>
+        <div class="tcontent">
+          <h4>Café noir ☕</h4>
+          <ul>
+            <li>Zéro sucre, zéro lait — l'insuline doit rester basse</li>
+            <li>Eau, thé vert sans sucre = parfait aussi</li>
+            <li>Le jeûne nocturne continue — ne pas casser maintenant</li>
+          </ul>
+        </div>
+      </div>
+      <div class="titem">
+        <div class="tdot" style="background:var(--pink);color:#fff">🚶</div>
+        <div class="ttime" style="color:var(--pink)">9h — Cardio à jeûn</div>
+        <div class="tcontent">
+          <h4>Marche rapide 60-90 min 🔥</h4>
+          <ul>
+            <li>130 pulsations/minute — modéré, tu peux parler</li>
+            <li>Après le cardio : attendre 1h30 avant de manger</li>
+            <li>Résultat : ~65g de graisse brûlée (4x plus qu'avec la mauvaise méthode)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="titem">
+        <div class="tdot" style="background:var(--teal);color:#fff">🍽️</div>
+        <div class="ttime" style="color:var(--teal)">13h — Premier repas</div>
+        <div class="tcontent">
+          <h4>Repas protéiné — ~450 cal 🥗</h4>
+          <ul>
+            <li>150g poulet rôti ou poisson maigre</li>
+            <li>200g épinards à l'ail + filet d'huile d'olive crue</li>
+            <li>1 œuf dur</li>
+            <li>Pas de pain, pas de riz, pas de pâtes</li>
+          </ul>
+        </div>
+      </div>
+      <div class="titem">
+        <div class="tdot" style="background:var(--green);color:#fff">🥜</div>
+        <div class="ttime" style="color:var(--green)">17h — Optionnel</div>
+        <div class="tcontent">
+          <h4>Snack si faim réelle 🥣</h4>
+          <ul>
+            <li>100g fromage blanc 0%</li>
+            <li>30g amandes (magnésium + bons lipides)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="titem">
+        <div class="tdot" style="background:var(--purple);color:#fff">🐟</div>
+        <div class="ttime" style="color:var(--purple)">20h — Dernier repas (CRITIQUE)</div>
+        <div class="tcontent">
+          <h4>Repas du soir — ~600 cal 🌙</h4>
+          <ul>
+            <li>200g saumon (oméga-3 maximum)</li>
+            <li>300g légumes mélangés (brocoli, carottes, courgettes)</li>
+            <li>150g patate douce max — pas plus</li>
+            <li>ZÉRO pâtes, pain, riz — l'hormone de croissance doit pouvoir travailler</li>
+          </ul>
+        </div>
+      </div>
+      <div class="titem">
+        <div class="tdot" style="background:var(--teal);color:#fff">😴</div>
+        <div class="ttime" style="color:var(--teal)">22h — Coucher</div>
+        <div class="tcontent">
+          <h4>7-8h de sommeil 💤</h4>
+          <ul>
+            <li>Insuline basse → 3-4h d'hormone de croissance active</li>
+            <li>Autophagie mitochondriale en cours toute la nuit</li>
+            <li>Chambre fraîche idéalement (17-19°C)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-green rv" style="margin-top:2.5rem">
+      <h4>🎯 Résultats attendus Phase 1</h4>
+      <p><strong>Semaines 1-2</strong> : -1 à 2kg (eau + glycogène libéré). <strong>Semaines 3-12</strong> : -0,5 à 1kg de graisse par semaine. <strong>En 3 mois : -6 à 12kg durablement.</strong> Ce n'est pas un régime — c'est la reprogrammation de ton métabolisme. Après 3 mois, le corps sait brûler la graisse naturellement. C'est pour ça que ça tient à vie.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span class="fn">Nutrivibe</span>
+  <p>Mon univers food & bien-être. Basé sur la science, pas les influenceurs.</p>
+  <p style="margin-top:.4rem;font-size:.75rem;opacity:.45">Usage personnel · Basé sur 48 vidéos analysées</p>
+</footer>
+
+<script>
+  // ── PARTICLES ──
+  const pc = document.getElementById('particles');
+  const cols = ['#ff6b9d','#26d9cc','#ffd93d','#6bcb77','#9b7dff','#ff9f43'];
+  for(let i=0;i<35;i++){
+    const p=document.createElement('div');
+    p.className='p';
+    const s=Math.random()*18+4;
+    p.style.cssText=`width:${s}px;height:${s}px;background:${cols[Math.floor(Math.random()*cols.length)]};left:${Math.random()*100}%;animation-duration:${Math.random()*20+15}s;animation-delay:-${Math.random()*20}s;border-radius:${Math.random()>.5?'50%':'4px'}`;
+    pc.appendChild(p);
+  }
+
+  // ── GSAP ──
+  gsap.registerPlugin(ScrollTrigger);
+
+  gsap.from('.hero-inner',{opacity:0,y:60,duration:1.3,ease:'power3.out'});
+
+  // counters
+  document.querySelectorAll('.hstat .n').forEach(el=>{
+    const t=+el.dataset.count;
+    gsap.fromTo(el,{textContent:0},{textContent:t,duration:2,delay:.6,ease:'power2.out',snap:{textContent:1},onUpdate(){el.textContent=Math.round(+el.textContent)}});
+  });
+
+  // scroll reveals
+  gsap.utils.toArray('.rv').forEach(el=>{
+    gsap.fromTo(el,{opacity:0,y:36},{opacity:1,y:0,duration:.85,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'}});
+  });
+
+  // ── ACTIVE NAV ──
+  const secs=document.querySelectorAll('section[id]');
+  const links=document.querySelectorAll('.nav-links a');
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        links.forEach(l=>{
+          l.classList.remove('active');
+          if(l.getAttribute('href')==='#'+e.target.id)l.classList.add('active');
+        });
+      }
+    });
+  },{threshold:.3});
+  secs.forEach(s=>io.observe(s));
+
+  // ── NAV SHRINK ──
+  window.addEventListener('scroll',()=>{
+    document.getElementById('navbar').style.padding=window.scrollY>60?'.6rem 2rem':'1rem 2rem';
+  });
+
+  // ── SMOOTH SCROLL ──
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      e.preventDefault();
+      const t=document.querySelector(a.getAttribute('href'));
+      if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+
+  // ── CARD MAGNETIC HOVER ──
+  document.querySelectorAll('.card').forEach(card=>{
+    card.addEventListener('mousemove',e=>{
+      const r=card.getBoundingClientRect();
+      const x=(e.clientX-r.left)/r.width-.5;
+      const y=(e.clientY-r.top)/r.height-.5;
+      card.style.transform=`translateY(-6px) rotateX(${-y*6}deg) rotateY(${x*6}deg)`;
+    });
+    card.addEventListener('mouseleave',()=>{card.style.transform=''});
+  });
+</script>
+</body>
+</html>
