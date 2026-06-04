@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Warrior Protocol — 30 Jours ⚔️</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -96,6 +101,12 @@ nav{
 }
 .stat-pill .val{font-family:var(--fd);font-size:1.8rem;color:var(--yellow)}
 .stat-pill .lbl{font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.stat-pill.perdu{background:rgba(64,200,120,.14);border-color:rgba(64,200,120,.5)}
+.stat-pill.perdu .val{color:var(--green)}
+.stat-pill.perdu .lbl{color:var(--green);opacity:.8}
+.sync-status{font-size:.78rem;font-weight:700;margin-bottom:.8rem;color:var(--muted);transition:color .2s}
+.sync-status.ok{color:var(--green)}
+.sync-status.warn{color:var(--orange)}
 
 /* TABS NAV */
 .tabs-wrap{
@@ -299,6 +310,7 @@ footer a{color:var(--yellow);text-decoration:none}
       <div class="stat-pill"><div class="val">77,8</div><div class="lbl">Kg départ</div></div>
       <div class="stat-pill"><div class="val">-7kg</div><div class="lbl">Objectif</div></div>
       <div class="stat-pill"><div class="val">3</div><div class="lbl">Repas/jour</div></div>
+      <div class="stat-pill perdu"><div class="val" id="statPerdu">—</div><div class="lbl">Perdu total</div></div>
     </div>
   </div>
 </div>
@@ -435,8 +447,9 @@ footer a{color:var(--yellow);text-decoration:none}
 <div class="section" id="tracker">
 <div class="container">
   <div class="tracker-wrap">
+    <div id="syncStatus" class="sync-status">☁ Connexion au cloud…</div>
     <table class="tracker-table">
-      <thead><tr><th>Jour</th><th>Date</th><th>Poids (kg)</th><th>Delta</th></tr></thead>
+      <thead><tr><th>Jour</th><th>Date</th><th>Poids (kg)</th><th>Delta</th><th>Total</th></tr></thead>
       <tbody id="trackerBody"></tbody>
     </table>
   </div>
@@ -511,23 +524,77 @@ const tbody=document.getElementById('trackerBody');
 const saved=JSON.parse(localStorage.getItem('warrior_poids')||'{}');
 dates.forEach(([j,d],i)=>{
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td>${j}</td><td style="color:var(--muted)">${d}</td><td><input class="poids-input" type="number" step="0.1" value="${saved[j]||''}" placeholder="—" onchange="savePoids('${j}',this.value,${i})" id="p${i}"></td><td class="delta" id="d${i}"></td>`;
+  tr.innerHTML=`<td>${j}</td><td style="color:var(--muted)">${d}</td><td><input class="poids-input" type="number" step="0.1" value="${saved[j]||''}" placeholder="—" onchange="savePoids('${j}',this.value,${i})" id="p${i}"></td><td class="delta" id="d${i}"></td><td class="delta" id="t${i}"></td>`;
   tbody.appendChild(tr);
 });
-function savePoids(j,v,i){saved[j]=v;localStorage.setItem('warrior_poids',JSON.stringify(saved));updateDeltas();}
+// CLOUD SYNC — données persistées sur Netlify Blobs, accessibles de n'importe quel appareil
+const SYNC_URL='/.netlify/functions/weights?token=tom-warrior-2026';
+function setSync(txt,cls){const el=document.getElementById('syncStatus');if(el){el.textContent=txt;el.className='sync-status '+(cls||'');}}
+let pushTimer=null;
+function pushCloud(){
+  clearTimeout(pushTimer);
+  pushTimer=setTimeout(async()=>{
+    setSync('☁ Sauvegarde…','');
+    try{
+      const r=await fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(saved)});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      setSync('✓ Sauvegardé dans le cloud','ok');
+    }catch(e){setSync('⚠ Hors ligne — sauvegardé sur cet appareil','warn');}
+  },600);
+}
+async function pullCloud(){
+  setSync('☁ Chargement…','');
+  try{
+    const r=await fetch(SYNC_URL);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const cloud=await r.json();
+    // Merge : cloud prioritaire, on garde aussi les saisies locales non encore synchro
+    const merged={...saved,...cloud};
+    Object.assign(saved,merged);
+    localStorage.setItem('warrior_poids',JSON.stringify(saved));
+    // Réinjecter dans les inputs
+    dates.forEach(([j],i)=>{const el=document.getElementById('p'+i);if(el)el.value=saved[j]||'';});
+    updateDeltas();
+    setSync('✓ Synchronisé','ok');
+    // Si le local avait des données non présentes dans le cloud, on repousse
+    if(JSON.stringify(merged)!==JSON.stringify(cloud))pushCloud();
+  }catch(e){setSync('⚠ Cloud injoignable — données locales affichées','warn');}
+}
+function savePoids(j,v,i){saved[j]=v;localStorage.setItem('warrior_poids',JSON.stringify(saved));updateDeltas();pushCloud();}
 function updateDeltas(){
   const vals=dates.map((_,i)=>{const el=document.getElementById('p'+i);return el&&el.value?parseFloat(el.value):null;});
+  const baseIdx=vals.findIndex(v=>v!==null);
+  const base=baseIdx>=0?vals[baseIdx]:null;
   vals.forEach((v,i)=>{
-    const el=document.getElementById('d'+i);if(!el)return;
-    if(i===0){el.textContent='—';return;}
-    const prev=vals[i-1];
-    if(v===null||prev===null){el.textContent='';return;}
-    const diff=v-prev;
-    el.textContent=(diff>0?'+':'')+diff.toFixed(1)+' kg';
-    el.className='delta '+(diff<0?'neg':diff>0?'pos':'');
+    // Delta vs veille
+    const el=document.getElementById('d'+i);
+    if(el){
+      if(i===0){el.textContent='—';}
+      else{
+        const prev=vals[i-1];
+        if(v===null||prev===null){el.textContent='';}
+        else{const diff=v-prev;el.textContent=(diff>0?'+':'')+diff.toFixed(1)+' kg';el.className='delta '+(diff<0?'neg':diff>0?'pos':'');}
+      }
+    }
+    // Total vs poids départ
+    const tel=document.getElementById('t'+i);
+    if(tel){
+      if(v===null||base===null){tel.textContent='';}
+      else if(i===baseIdx){tel.textContent='—';tel.className='delta';}
+      else{const tot=v-base;tel.textContent=(tot>0?'+':'')+tot.toFixed(1)+' kg';tel.className='delta '+(tot<0?'neg':tot>0?'pos':'');}
+    }
   });
+  // Carte "Perdu total" = dernier poids saisi vs départ
+  const sp=document.getElementById('statPerdu');
+  if(sp){
+    let lastIdx=-1;
+    for(let k=vals.length-1;k>=0;k--){if(vals[k]!==null){lastIdx=k;break;}}
+    if(base===null||lastIdx<0||lastIdx===baseIdx){sp.textContent='—';}
+    else{const tot=vals[lastIdx]-base;sp.textContent=(tot>0?'+':'')+tot.toFixed(1)+' kg';}
+  }
 }
 updateDeltas();
+pullCloud();
 </script>
 </body>
 </html>

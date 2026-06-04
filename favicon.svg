@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Watermelon slice — flat style -->
+  <!-- green rind -->
+  <path d="M256 80 L44 360 Q256 468 468 360 Z" fill="#7cb342"/>
+  <!-- white band -->
+  <path d="M256 116 L74 348 Q256 444 438 348 Z" fill="#eceff1"/>
+  <!-- red flesh -->
+  <path d="M256 132 L92 340 Q256 426 420 340 Z" fill="#e2433f"/>
+  <!-- subtle center fold (slightly darker right half) -->
+  <path d="M256 132 L420 340 Q338 384 256 396 Z" fill="#d33b38" opacity="0.5"/>
+  <!-- seeds -->
+  <g fill="#37404a">
+    <ellipse cx="232" cy="196" rx="9" ry="13"/>
+    <ellipse cx="288" cy="200" rx="9" ry="13"/>
+    <ellipse cx="196" cy="244" rx="9" ry="13"/>
+    <ellipse cx="256" cy="250" rx="9" ry="13"/>
+    <ellipse cx="318" cy="244" rx="9" ry="13"/>
+    <ellipse cx="166" cy="296" rx="9" ry="13"/>
+    <ellipse cx="224" cy="300" rx="9" ry="13"/>
+    <ellipse cx="290" cy="300" rx="9" ry="13"/>
+    <ellipse cx="350" cy="294" rx="9" ry="13"/>
+    <ellipse cx="256" cy="344" rx="9" ry="13"/>
+    <ellipse cx="196" cy="340" rx="9" ry="13"/>
+    <ellipse cx="318" cy="340" rx="9" ry="13"/>
+  </g>
+</svg>
